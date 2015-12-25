@@ -2,6 +2,6 @@ name: ShinyCode
 account: flaforgia
 server: shinyapps.io
 appId: 75265
-bundleId: 338507
+bundleId: 338610
 url: https://flaforgia.shinyapps.io/ShinyCode
-when: 1451041300.71757
+when: 1451065154.03689

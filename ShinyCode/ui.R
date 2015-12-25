@@ -1,6 +1,6 @@
 library(shiny)
 shinyUI(pageWithSidebar(
-        headerPanel("NOX And CO2 Predictions Per Gas Mileage"),
+        headerPanel("CO2 Predictions Per Gas Mileage"),
         sidebarPanel(
                 strong("Usage:"),
                 helpText("Select the gas type and input the gas mileage in liter per 100 kms (European unit)."),
@@ -9,9 +9,9 @@ shinyUI(pageWithSidebar(
                 br(),                
                 h2("Predictions"),
                 selectInput("gas", label=h5("Select type of gas"),
-                            choices=list("Diesel"=1, "Essence"=2)),
+                            choices=list("Diesel"=1, "Gasoline"=2)),
                         
-                textInput("conso", label=h6("Enter the gas mileage in liter / 100 kms"),
+                textInput("conso", label=h6("Enter the gas mileage in liter per 100 kms"),
                           value=5 ),
                 
                 submitButton("Submit")

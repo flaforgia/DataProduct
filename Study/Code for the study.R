@@ -1,5 +1,8 @@
-# Load dataset
-cars.2015 <- read.csv("/Users/flaforgia/Documents/Data products/Polution CO2/Data sets/fic_etiq_edition_40-mars-2015.csv", sep=";", encoding="latin1")
+# Load and read the dataset
+downloadURL <- "https://www.data.gouv.fr/s/resources/emissions-de-co2-et-de-polluants-des-vehicules-commercialises-en-france/20151015-121340/fic_etiq_edition_40-mars-2015.zip"
+download.file(downloadURL,destfile = "dataset.zip", method="curl")
+dataset.csv <- unzip('dataset.zip')
+cars.2015 <- read.csv(dataset.csv, sep=";", encoding="latin1")
 colnames(cars.2015)
 
 # Filter and rename the dataset
