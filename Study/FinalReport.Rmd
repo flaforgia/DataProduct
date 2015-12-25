@@ -2,7 +2,7 @@
 title: "Statistical Analysis Of The CO2 Emission For The Cars Sold In France In 2015"
 author: "Francois Laforgia"
 date: "24 Dec 2015"
-output: html_document
+output: pdf_document
 ---
 
 ## Summary  
@@ -12,15 +12,15 @@ The dataset has been used to generate two predictives models, one for each type 
 ## Important Information About The Data
 The dataset used is local to France and it include only the models sold in France. There could be some difference in countries were other models are sold.  
 The units used in this study are european units. So the gas mileage is not given in Miles Per Galon, like it is usually the case in the US but in Liter per 100 Kms, abreviated L/kms in the lectures. You need to convert you mileage in this unit before using the shiny app.  
-The data include the information for the VolksWagen car even if now we know that the data provided by the car maker are biaised because the company cheated on the test results.    
-This study focused on the CO2 (Carbon Dioxyde). This pollutant is one of the gas that are part of the greenhouse effect.  
+The data include the information for the VolksWagen car even if now we know that the data provided by the car maker are biaised because the company cheated on the test results [1].    
+This study focused on the CO2 (Carbon Dioxyde). This pollutant is one of the gas that are part of the greenhouse effect[2][3].  
 
 ## Information about this report  
 All the web links regarding the inforamtion provided in this report are given in the appendix.  
 The code will be shown and executed when possible but the full R code used for the study is also available on github and so is this report.
 
 ### Data Exploratory
-The dataset has been downloaded from the open data French government. This dataset is about the poluants emission for the cars sold in France during the year 2015 up to October 2015. The file comes as zipped a csv file. The csv used a ";" as separator and the encoding is not UTF-8 but latin1. 
+The dataset has been downloaded from the open data French government [4]. This dataset is about the poluants emission for the cars sold in France during the year 2015 up to October 2015. The file comes as zipped a csv file. The csv used a ";" as separator and the encoding is not UTF-8 but latin1. 
 ```{r echo=TRUE, warning=FALSE}
 setwd("/Users/flaforgia/Documents/Data products/Polution CO2/Data sets/")
 cars.2015 <- read.csv("fic_etiq_edition_40-mars-2015.csv", sep=";", encoding="latin1")
@@ -165,3 +165,11 @@ paste("The slope for diesel cars: ", (sumCoef.GO[2,1] + c(-1, 1) * qt(0.975, df 
 ## Conclusion
 As define by the chemistry, the CO2 emission is higly dependent of the gas mileage. We have used this strong and almost perfect correlation to build a predictive model and withis model we can predict the CO2 emission for any gas mileage provided w/ the caveat this mileage must be provided in the european unit.
 The CO2 correlation to the gas mileage can be explained by the way of the CO2 is generated in the engine. The CO2 is the result of a combustion between the oxygen and the carbone contained in the fuel. So the volume of CO2 depends partly on the volume of fuel injected in the combustion chamber. This volume is reported as the comsuption of fuel by the car makers, so it is the gas mileage. The second part of the equation is the volume of oxygen, which is represented by the air injected in the combustion chamber. This volume is more or less constant between the different model of cars and so it does not impact the CO2 emission prediction as the fuel volume.
+
+\pagebreak
+
+## References
+[1] VolksWagen case in the US: https://en.wikipedia.org/wiki/Volkswagen_emissions_scandal  
+[2] Carbon Dioxyde: http://www.dft.gov.uk/vca/fcb/cars-and-carbon-dioxide.asp  
+[3] GreenHouse gas: https://en.wikipedia.org/wiki/Greenhouse_gas  
+[4] Cars sold in France for 2015 dataset: https://www.data.gouv.fr/fr/datasets/emissions-de-co2-et-de-polluants-des-vehicules-commercialises-en-france
