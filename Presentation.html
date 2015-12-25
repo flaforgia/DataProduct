@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Application For CO2 Prediction</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Application For CO2 Prediction">
+  <meta name="author" content="Francois Laforgia">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/tomorrow.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  <link rel=stylesheet href="./assets/css/ribbons.css"></link>
+
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="libraries/frameworks/io2012/js/slides" 
+    src="libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+    <h1>Application For CO2 Prediction</h1>
+    <h2>Cars Sold In France In 2015</h2>
+    <p>Francois Laforgia<br/></p>
+  </hgroup>
+  <article></article>  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="" id="slide-1" style="background:;">
+  <hgroup>
+    <h2>Presentation Of The Original Study</h2>
+  </hgroup>
+  <article data-timings="">
+    <h1>Why cars?</h1>
+
+<ul>
+<li>Cars are not the only one to emit CO2 but they are the one on which the individuals can have an influence.</li>
+<li>Transportation causes 31% of the CO2 emission in the US and the cars emit one-fith of the total CO2 emissions in Europe.</li>
+</ul>
+
+<h1>Why CO2?</h1>
+
+<ul>
+<li>CO2 is one of the main cause of the greenhouse effect which causes of the Global Warming.</li>
+<li>CO2 is strongly linked to the gas mileage which make it easy to predict (univariate linear model).</li>
+</ul>
+
+<h1>Results</h1>
+
+<ul>
+<li>The original study is detailed in a final report available on github (<a href="https://github.com/flaforgia/DataProduct">https://github.com/flaforgia/DataProduct</a>).</li>
+<li>The predictive model is used in a shiny application (<a href="https://flaforgia.shinyapps.io/ShinyCode">https://flaforgia.shinyapps.io/ShinyCode</a>).</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-2" style="background:;">
+  <hgroup>
+    <h2>The Application (1)</h2>
+  </hgroup>
+  <article data-timings="">
+    <h1>Overview</h1>
+
+<ul>
+<li>Allow user to predict the level of CO2 emission for a specific gas mileage.</li>
+<li>Use the European Mileage unit, which is liter per 100 kms.</li>
+<li>Based on a prediction model describe in the study &quot;CO2 emission of the cars sold in France in 2015&quot;.</li>
+<li>Limited to diesel and gasoline because they are the main types of fuel used in France (~ 94% of the total sales).</li>
+</ul>
+
+<h1>Format</h1>
+
+<ul>
+<li>Web application.</li>
+<li>Written in R with the shiny package.</li>
+<li>Hosted on the shiny apps web site.</li>
+<li>Publicly available.</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-3" style="background:;">
+  <hgroup>
+    <h2>The Application (2)</h2>
+  </hgroup>
+  <article data-timings="">
+    <h1>Model</h1>
+
+<ul>
+<li>Univariate Linear Model</li>
+</ul>
+
+<pre><code class="r">paste(&quot;CO2 emission for gasoline:&quot;,round(predict(modelFit.co2.ES,newset2),2),&quot;g/km.&quot;)
+</code></pre>
+
+<pre><code>## [1] &quot;CO2 emission for gasoline: 83.14 g/km.&quot;
+## [2] &quot;CO2 emission for gasoline: 86.37 g/km.&quot;
+</code></pre>
+
+<h1>Shiny server</h1>
+
+<ul>
+<li>Active code:
+
+<ul>
+<li>Read the csv dataset and perfom data manipulation</li>
+<li>Generate the models<br></li>
+</ul></li>
+<li>This code is executed outside the shinyServer and thus it is independant of the user session. Speed-up the shinyServer code (no need to read the csv each time)</li>
+<li>Use a reactive expression to predict the value depending on the input parameter.</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="" id="slide-4" style="background:;">
+  <hgroup>
+    <h2>The Application (3)</h2>
+  </hgroup>
+  <article data-timings="">
+    <h1>User Interface</h1>
+
+<ul>
+<li>Allows the user to:
+
+<ul>
+<li>Choose the gas type</li>
+<li>Enter the gas mileage in liter per 100 kms</li>
+<li>Usage of the UI is provided in the sidebar panel</li>
+</ul></li>
+</ul>
+
+<h1>Next Steps</h1>
+
+<ul>
+<li>Increase the localisation to the rest of the world.</li>
+<li>Add more pollutants (NOx for example)</li>
+<li>Add more gas type (LPG for example)</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title='Presentation Of The Original Study'>
+         1
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title='The Application (1)'>
+         2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='The Application (2)'>
+         3
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=4 title='The Application (3)'>
+         4
+      </a>
+    </li>
+  </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  
+  <!-- LOAD HIGHLIGHTER JS FILES -->
+  <script src="libraries/highlighters/highlight.js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- DONE LOADING HIGHLIGHTER JS FILES -->
+   
+  </html>
