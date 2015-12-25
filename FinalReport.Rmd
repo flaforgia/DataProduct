@@ -1,0 +1,175 @@
+---
+title: "Statistical Analysis Of The CO2 Emission For The Cars Sold In France In 2015"
+author: "Francois Laforgia"
+date: "24 Dec 2015"
+output: pdf_document
+---
+
+## Summary  
+This report will explain how to predict the CO2 emissions based on a dataset which include all the cars sold in France during 2015 (up to October 2015). The analysis has been done on two different kind of gas, Diesel and Petrol. It has been decided to remove from the analysis the electric cars (hybrid or full electric) and also the gas type like the LPG for example. Also the study does not take into account the different methods that can be used t odecrease this level of emission  like the particle filters or the catalytic converters.  
+The dataset has been used to generate two predictives models, one for each type of fuel.  The models then were used in a shiny application to predict the level of CO2 for any of gas mileage. 
+
+## Important Information About The Data
+The dataset used is local to France and it include only the models sold in France. There could be some difference in countries were other models are sold.  
+The units used in this study are european units. So the gas mileage is not given in Miles Per Galon, like it is usually the case in the US but in Liter per 100 Kms, abreviated L/kms in the lectures. You need to convert you mileage in this unit before using the shiny app.  
+The data include the information for the VolksWagen car even if now we know that the data provided by the car maker are biaised because the company cheated on the test results [1].    
+This study focused on the CO2 (Carbon Dioxyde). This pollutant is one of the gas that are part of the greenhouse effect[2][3].  
+
+## Information about this report  
+All the web links regarding the inforamtion provided in this report are given in the appendix.  
+The code will be shown and executed when possible but the full R code used for the study is also available on github and so is this report.
+
+### Data Exploratory
+The dataset has been downloaded from the open data French government [4]. This dataset is about the poluants emission for the cars sold in France during the year 2015 up to October 2015. The file comes as zipped a csv file. The csv used a ";" as separator and the encoding is not UTF-8 but latin1. 
+```{r echo=TRUE, warning=FALSE}
+setwd("/Users/flaforgia/Documents/Data products/Polution CO2/Data sets/")
+cars.2015 <- read.csv("fic_etiq_edition_40-mars-2015.csv", sep=";", encoding="latin1")
+```
+The dataset contains 20880 observations of 26 variables. Each observation is a model of cars. A detailed view of the variables shows that not all will be accurrate for this study. I selected only the most relevant and I gave up the adminstrative variable which are not part of this study.  
+Also the names are in French so for internaltionalization purpose, it has been decided to rename them with a more english explicit name. 
+```{r echo=TRUE, warning=FALSE}
+colnames(cars.2015)
+select.2015 <- c("lib_mrq_doss", "lib_mod_doss", "energ", "hybride", "puiss_max", "typ_boite_nb_rapp", 
+                 "conso_urb_93", "conso_exurb" , "conso_mixte", "co2_mixte", "co_typ_1", 
+                 "hc", "nox", "hcnox", "ptcl", "masse_ordma_min", "masse_ordma_max")
+cars.2015 <- cars.2015[,select.2015]
+names.2015 <- c("maker", "model", "gas", "hybrid", "max_hp", "gear", "city_gas_mileage", "hghy_gas_mileage" , "mix_gas_mileage", 
+                "co2", "co_typ_1", "hc", "nox", "hcnox", "ptcl", "min_wght", "max_wght")
+
+names(cars.2015) <- names.2015
+```
+Some type of fuel are too marginal to influence greatly the result and it has been taken the decision to give them up. Moreover the Diesel (GO) and the Petrol (ES) cars represent `r round((((nrow(cars.2015[cars.2015$gas == "GO ",])+nrow(cars.2015[cars.2015$gas == "ES ",]))/nrow(cars.2015))*100),2)` % of the whole dataset.  
+For the gas mileage, we will focus on the variable names mix_gas_mileage. This variable represent the gas mileage for a car that is used both to drive in a city (city_gas_mileage) and also on an highway (hghy__gas_mileage) and in general it is the main usage of the cars. 
+The dataset was split in two parts, one for each type of fuel and the N/A values were removed from the cols co2 for each sub-datasets. 
+```{r echo=TRUE, warning=FALSE}
+library(dplyr)
+cars.ES <- filter(cars.2015, gas=="ES ")
+cars.GO <- filter(cars.2015, gas=="GO ")
+
+cars.GO <- cars.GO[complete.cases(cars.GO$co2),]
+cars.ES <- cars.ES[complete.cases(cars.ES$co2),]
+```
+
+## Data Analysis
+The pollutant we want to check is the co2. This pollutant is strongly connected to the gas mileage. To confirm that a correlation analysis is done of the co2 against all the other variables. To do that it has been decided to remove all the non-numeric variables which have no influence on the study.
+```{r echo=TRUE, warning=FALSE}
+cars.GO <- select(cars.GO, 
+                  mix_gas_mileage, 
+                  max_hp, co2, 
+                  co_typ_1, nox, 
+                  hcnox, ptcl, 
+                  min_wght, 
+                  max_wght, 
+                  hghy_gas_mileage, 
+                  city_gas_mileage)
+
+cars.ES <- select(cars.ES, 
+                  mix_gas_mileage, 
+                  max_hp, co2, 
+                  co_typ_1, nox, 
+                  hcnox, ptcl, 
+                  min_wght, 
+                  max_wght, 
+                  hghy_gas_mileage, 
+                  city_gas_mileage)
+
+cor(cars.GO$co2, cars.GO[,])
+cor(cars.ES$co2, cars.ES[,])
+```
+As it is shown by the correlations, the co2 varaiable is strongly linked to the gas mileage, almost 1 which is the prefect correlation. This can be proved by plotting the co2 values against the mix_gas_mileage values.  
+```{r echo=TRUE, warning=FALSE}
+library(ggplot2)
+co2.ES <- ggplot(cars.ES, aes(x=mix_gas_mileage, y=co2))
+co2.ES <- co2.ES + geom_point(aes(, colour=mix_gas_mileage)) + scale_colour_gradient(low="blue")
+co2.ES <- co2.ES + ggtitle("co2 Emission Vs. Mixte gas mileage in petrol cars")
+co2.ES
+
+co2.GO <- ggplot(cars.GO, aes(x=mix_gas_mileage, y=co2))
+co2.GO <- co2.GO + geom_point(aes(, colour=mix_gas_mileage)) + scale_colour_gradient(low="blue")
+co2.GO <- co2.GO + ggtitle("co2 Emission Vs. Mixte gas mileage in diesel cars")
+co2.GO
+```
+
+Based on the shape of the plot, this almost perfect plot can also be the sign of heteroskedasticity. To confirm or not that, we need to perform a residual analysis. To do that we will plot the residual given by the model against the X axis.  
+As starting poimnt we fit a linear model for both fuel type (co2~mix_gas_mileage).
+```{r echo=TRUE, warning=TRUE}
+modelFit.co2.ES <- lm(co2~mix_gas_mileage, data=cars.ES)
+summary(modelFit.co2.ES)
+modelFit.co2.GO <- lm(co2~mix_gas_mileage, data=cars.GO)
+summary(modelFit.co2.GO)
+```
+The summary of these model show a p-value very low for both model. This is the sign that the model is good and that we won't fail to predict correct values.   
+We than plotted the residuals.
+```{r echo=TRUE, warning=FALSE}
+cars.ES.resid <- resid(modelFit.co2.ES)
+cars.ES.yhat <- predict(modelFit.co2.ES)
+cars.ES.y <- cars.ES$co2
+plot(cars.ES.yhat, cars.ES.resid, xlab = "predicted CO2 value (Petrol)", ylab = "residuals", bg = "lightblue", col = "black", cex = 2, pch = 21, frame=FALSE)
+abline(h = 0, lwd = 2)
+
+cars.GO.resid <- resid(modelFit.co2.GO)
+cars.GO.yhat <- predict(modelFit.co2.GO)
+cars.GO.y <- cars.GO$co2
+plot(cars.GO.yhat, cars.GO.resid, xlab = "predicted CO2 value (Diesel)", ylab = "residuals", bg = "lightblue", col = "black", cex = 2, pch = 21, frame=FALSE)
+abline(h = 0, lwd = 2)
+```
+
+With these plots, we confirm there is not so much dispersion of the residuals and they stay grouped around the 0 line. This means we can use this model to predict the CO2 emission value for any gas mileage with the caveat that the gas mileage represent the mist gas mileage.
+We can now plot the prediction interval of the outcomes for each model to confirm that they are accurrate.
+```{r echo=TRUE, warning=FALSE}
+newset.ES <- data.frame(mix_gas_mileage= seq(min(cars.ES$mix_gas_mileage), max(cars.ES$mix_gas_mileage), length=100))
+newset.GO <- data.frame(mix_gas_mileage= seq(min(cars.GO$mix_gas_mileage), max(cars.GO$mix_gas_mileage), length=100))
+
+predict1.co2.ES <- data.frame(predict(modelFit.co2.ES, newset.ES, interval="confidence"))
+predict2.co2.ES <- data.frame(predict(modelFit.co2.ES, newset.ES, interval="prediction"))
+predict1.co2.ES$interval <- "confidence"
+predict2.co2.ES$interval <- "prediction"
+predict1.co2.ES$mix_gas_mileage <- newset.ES$mix_gas_mileage
+predict2.co2.ES$mix_gas_mileage <- newset.ES$mix_gas_mileage
+data <- rbind(predict1.co2.ES, predict2.co2.ES)
+names(data)[1] <- "y"
+plot.co2.ES <- ggplot(data, aes(x = mix_gas_mileage, y = y))
+plot.co2.ES <- plot.co2.ES + xlab("gas mileage in liter per 100 kms")
+plot.co2.ES <- plot.co2.ES + ylab("co2 prediction")
+plot.co2.ES <- plot.co2.ES + geom_ribbon(aes(ymin=lwr, ymax=upr, fill=interval), alpha=0.2)
+plot.co2.ES <- plot.co2.ES + geom_line()
+plot.co2.ES <- plot.co2.ES + geom_point(data=data.frame(x=cars.ES$mix_gas_mileage, y=cars.ES$co2), aes(x=x, y=y), size=0.5)
+plot.co2.ES <- plot.co2.ES + ggtitle("Outcomes plot for the petrol cars")
+plot.co2.ES
+
+predict1.co2.GO <- data.frame(predict(modelFit.co2.GO, newset.GO, interval="confidence"))
+predict2.co2.GO <- data.frame(predict(modelFit.co2.GO, newset.GO, interval="prediction"))
+predict1.co2.GO$interval <- "confidence"
+predict2.co2.GO$interval <- "prediction"
+predict1.co2.GO$mix_gas_mileage <- newset.GO$mix_gas_mileage
+predict2.co2.GO$mix_gas_mileage <- newset.GO$mix_gas_mileage
+data <- rbind(predict1.co2.GO, predict2.co2.GO)
+names(data)[1] <- "y"
+plot.co2.GO <- ggplot(data, aes(x = mix_gas_mileage, y = y))
+plot.co2.GO <- plot.co2.GO + xlab("gas mileage in liter per 100 kms")
+plot.co2.GO <- plot.co2.GO + ylab("co2 prediction")
+plot.co2.GO <- plot.co2.GO + geom_ribbon(aes(ymin=lwr, ymax=upr, fill=interval), alpha=0.2)
+plot.co2.GO <- plot.co2.GO + geom_line()
+plot.co2.GO <- plot.co2.GO + geom_point(data=data.frame(x=cars.GO$mix_gas_mileage, y=cars.GO$co2), aes(x=x, y=y), size=0.5)
+plot.co2.GO <- plot.co2.GO + ggtitle("Outcomes plot for diesel cars")
+plot.co2.GO
+```
+
+And also the confidence interval for each model.
+```{r echo=TRUE, warning=FALSE}
+sumCoef.ES <- summary(modelFit.co2.ES)$coefficients
+sumCoef.GO <- summary(modelFit.co2.GO)$coefficients
+paste("The slope for petrol cars: ", (sumCoef.ES[2,1] + c(-1, 1) * qt(0.975, df = modelFit.co2.ES$df) * sumCoef.ES[2,2])/length(cars.ES)-1)
+paste("The slope for diesel cars: ", (sumCoef.GO[2,1] + c(-1, 1) * qt(0.975, df = modelFit.co2.GO$df) * sumCoef.GO[2,2])/length(cars.GO)-1)
+```
+## Conclusion
+As define by the chemistry, the CO2 emission is higly dependent of the gas mileage. We have used this strong and almost perfect correlation to build a predictive model and withis model we can predict the CO2 emission for any gas mileage provided w/ the caveat this mileage must be provided in the european unit.
+The CO2 correlation to the gas mileage can be explained by the way of the CO2 is generated in the engine. The CO2 is the result of a combustion between the oxygen and the carbone contained in the fuel. So the volume of CO2 depends partly on the volume of fuel injected in the combustion chamber. This volume is reported as the comsuption of fuel by the car makers, so it is the gas mileage. The second part of the equation is the volume of oxygen, which is represented by the air injected in the combustion chamber. This volume is more or less constant between the different model of cars and so it does not impact the CO2 emission prediction as the fuel volume.
+
+\pagebreak
+
+## References
+[1] VolksWagen case in the US: https://en.wikipedia.org/wiki/Volkswagen_emissions_scandal  
+[2] Carbon Dioxyde: http://www.dft.gov.uk/vca/fcb/cars-and-carbon-dioxide.asp  
+[3] GreenHouse gas: https://en.wikipedia.org/wiki/Greenhouse_gas  
+[4] Cars sold in France for 2015 dataset: https://www.data.gouv.fr/fr/datasets/emissions-de-co2-et-de-polluants-des-vehicules-commercialises-en-france
