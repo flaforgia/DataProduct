@@ -1,0 +1,11 @@
+---
+title: "NOx And CO2 prediction Prompt"
+author: "Francois Laforgia"
+date: "24 Dec 2015"
+output: html_document
+---
+
+Download the dataset on the CO2 and NOx emission for all vehicules sold in France. The dataset is the last one (updated in October 2015) and it is available on https://www.data.gouv.fr/s/resources/emissions-de-co2-et-de-polluants-des-vehicules-commercialises-en-france/20151015-121340/fic_etiq_edition_40-mars-2015.zip
+
+Perform the data exploratory and analysis to figure out what features must be included in the prediction model to predict the value NOx and CO2 emissions.  
+Fit 4 models, two for the Diesel engines and 2 for the essence engines. Each gas type will include one model for the CO2 emissions and one for the NOx emissions.
